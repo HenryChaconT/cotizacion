@@ -33,7 +33,7 @@ public class CotizacionServiceImpl implements CotizacionService {
     @Autowired
     private ModelMapper maper;
 
-    @Autowired
+    @Override
     public byte[] exportPdf(List<CotizacionDetalleDto>  list, CotizacionDto list2) throws JRException, FileNotFoundException {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
