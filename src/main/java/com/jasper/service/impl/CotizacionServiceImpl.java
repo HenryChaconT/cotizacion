@@ -6,6 +6,7 @@ import com.jasper.entity.Cotizacion;
 import com.jasper.entity.CotizacionDetalle;
 import com.jasper.exception.ResourceNotFoundException;
 import com.jasper.repository.CotizacionRepository;
+import com.jasper.service.CotizacionService;
 import com.jasper.util.ReportGenerator;
 import net.sf.jasperreports.engine.JRException;
 import org.modelmapper.ModelMapper;
@@ -21,7 +22,7 @@ import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 @Service
-public class CotizacionServiceImpl {
+public class CotizacionServiceImpl implements CotizacionService {
 
     @Autowired
     private ReportGenerator reportGenerator;
@@ -32,6 +33,7 @@ public class CotizacionServiceImpl {
     @Autowired
     private ModelMapper maper;
 
+    @Autowired
     public byte[] exportPdf(List<CotizacionDetalleDto>  list, CotizacionDto list2) throws JRException, FileNotFoundException {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
@@ -77,11 +79,17 @@ public class CotizacionServiceImpl {
         return reportGenerator.exportToPdf(list,list2);
     }
 
+    @Override
+    public CotizacionDto saveCotizacion(CotizacionDto cotizacionDto) {
+        return null;
+    }
+
     private static double redondearADosDecimales(double numero) {
         DecimalFormat df = new DecimalFormat("#.##");
         return Double.parseDouble(df.format(numero));
     }
 
+    @Override
     public CotizacionDto getById(long id){
         Cotizacion cotizacion=cotizacionRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("cotizacion","id",id));
 
