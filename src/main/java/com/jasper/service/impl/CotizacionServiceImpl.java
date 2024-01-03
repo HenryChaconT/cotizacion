@@ -89,6 +89,7 @@ public class CotizacionServiceImpl implements CotizacionService {
     }
 
     @Override
+<<<<<<< HEAD
     public void save(CotizacionDto cotizacionDto) {
 
         List<Cotizacion> listaCotizacion=cotizacionRepository.findAll();
@@ -110,6 +111,10 @@ public class CotizacionServiceImpl implements CotizacionService {
 
 
 
+=======
+    public CotizacionDto saveCotizacion(CotizacionDto cotizacionDto) {
+        return null;
+>>>>>>> fe381c97e6c2f1b796b6fc073af974d7180c8b1b
     }
 
     private static double redondearADosDecimales(double numero) {
@@ -117,6 +122,7 @@ public class CotizacionServiceImpl implements CotizacionService {
         return Double.parseDouble(df.format(numero));
     }
 
+    @Override
     public CotizacionDto getById(long id){
         Cotizacion cotizacion=cotizacionRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("cotizacion","id",id));
 
