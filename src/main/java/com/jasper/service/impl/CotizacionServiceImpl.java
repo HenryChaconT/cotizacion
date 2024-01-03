@@ -5,9 +5,12 @@ import com.jasper.dto.CotizacionDto;
 import com.jasper.entity.Cotizacion;
 import com.jasper.entity.CotizacionDetalle;
 import com.jasper.exception.ResourceNotFoundException;
+import com.jasper.repository.CotizacioDetalleRepository;
 import com.jasper.repository.CotizacionRepository;
+import com.jasper.service.CotizacionService;
 import com.jasper.util.ReportGenerator;
 import net.sf.jasperreports.engine.JRException;
+import org.hibernate.query.sql.internal.ParameterRecognizerImpl;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,10 +24,13 @@ import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 @Service
-public class CotizacionServiceImpl {
+public class CotizacionServiceImpl implements CotizacionService {
 
     @Autowired
     private ReportGenerator reportGenerator;
+
+    @Autowired
+    private CotizacioDetalleRepository cotizacioDetalleRepository;
 
     @Autowired
     private CotizacionRepository cotizacionRepository;
@@ -32,6 +38,7 @@ public class CotizacionServiceImpl {
     @Autowired
     private ModelMapper maper;
 
+    @Override
     public byte[] exportPdf(List<CotizacionDetalleDto>  list, CotizacionDto list2) throws JRException, FileNotFoundException {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
@@ -47,7 +54,7 @@ public class CotizacionServiceImpl {
         //COTIZACION DTO LIST2
         List<Cotizacion> listaCotizacion=cotizacionRepository.findAll();
         CotizacionDto cotizacionDto=getById(listaCotizacion.size());
-        int correlativo= Integer.parseInt(cotizacionDto.getCorrelativo()) + 1;
+        int correlativo= Integer.parseInt(cotizacionDto.getCorrelativo());
         String correlativoString = String.format("%07d", correlativo);
 
         list2.setCorrelativo(correlativoString);
@@ -74,7 +81,35 @@ public class CotizacionServiceImpl {
         //importe total
         list2.setImporteTotal(redondearADosDecimales(gravada+igv));
 
+
+
+
+
         return reportGenerator.exportToPdf(list,list2);
+    }
+
+    @Override
+    public void save(CotizacionDto cotizacionDto) {
+
+        List<Cotizacion> listaCotizacion=cotizacionRepository.findAll();
+        CotizacionDto cotizacionDto1=getById(listaCotizacion.size());
+        int correlativo= Integer.parseInt(cotizacionDto1.getCorrelativo()) + 1;
+        String correlativoString = String.format("%07d", correlativo);
+
+        cotizacionDto.setCorrelativo(correlativoString);
+
+        cotizacionRepository.save(maper.map(cotizacionDto,Cotizacion.class));
+
+
+
+        cotizacionDto.getCotizacionDetalleDtos().forEach(list->list.setCorrelativo(correlativoString));
+
+        List<CotizacionDetalle> cotizacionDetalles=cotizacionDto.getCotizacionDetalleDtos().stream().map(list->maper.map(list,CotizacionDetalle.class)).toList();
+        cotizacioDetalleRepository.saveAll(cotizacionDetalles);
+
+
+
+
     }
 
     private static double redondearADosDecimales(double numero) {

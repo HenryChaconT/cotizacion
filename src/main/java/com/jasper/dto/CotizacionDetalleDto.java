@@ -10,6 +10,7 @@ import lombok.Setter;
 public class CotizacionDetalleDto {
 
     private long id;
+    private String correlativo;
     private String codigo;
     private String descripcion;
     private String unidad;

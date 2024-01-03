@@ -18,6 +18,8 @@ public class CotizacionDetalle {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column
+    private String correlativo;
+    @Column
     private String codigo;
     @Column
     private String descripcion;
