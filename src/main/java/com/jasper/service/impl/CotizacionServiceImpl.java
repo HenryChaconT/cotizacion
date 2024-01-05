@@ -53,8 +53,9 @@ public class CotizacionServiceImpl implements CotizacionService {
 
         //COTIZACION DTO LIST2
         List<Cotizacion> listaCotizacion=cotizacionRepository.findAll();
-        CotizacionDto cotizacionDto=getById(listaCotizacion.size());
-        int correlativo= Integer.parseInt(cotizacionDto.getCorrelativo());
+        long ultimoId= listaCotizacion.stream().mapToLong(Cotizacion::getId).max().orElseThrow();
+        CotizacionDto cotizacionDto=getById(ultimoId);
+        int correlativo= Integer.parseInt(cotizacionDto.getCorrelativo())+1;
         String correlativoString = String.format("%07d", correlativo);
 
         list2.setCorrelativo(correlativoString);
@@ -82,14 +83,16 @@ public class CotizacionServiceImpl implements CotizacionService {
         list2.setImporteTotal(redondearADosDecimales(gravada+igv));
 
 
-
-
+        //Guardar EN DASE DE DATOS
+        cotizacionRepository.save(maper.map(list2,Cotizacion.class));
+        list.forEach(listCorrelativo->listCorrelativo.setCorrelativo(correlativoString));
+        List<CotizacionDetalle>ListaDetalleCotizacion= list.stream().map(listaDetalle->maper.map(listaDetalle,CotizacionDetalle.class)).toList();
+        cotizacioDetalleRepository.saveAll(ListaDetalleCotizacion);
 
         return reportGenerator.exportToPdf(list,list2);
     }
 
     @Override
-<<<<<<< HEAD
     public void save(CotizacionDto cotizacionDto) {
 
         List<Cotizacion> listaCotizacion=cotizacionRepository.findAll();
@@ -109,12 +112,6 @@ public class CotizacionServiceImpl implements CotizacionService {
         cotizacioDetalleRepository.saveAll(cotizacionDetalles);
 
 
-
-
-=======
-    public CotizacionDto saveCotizacion(CotizacionDto cotizacionDto) {
-        return null;
->>>>>>> fe381c97e6c2f1b796b6fc073af974d7180c8b1b
     }
 
     private static double redondearADosDecimales(double numero) {
@@ -122,7 +119,6 @@ public class CotizacionServiceImpl implements CotizacionService {
         return Double.parseDouble(df.format(numero));
     }
 
-    @Override
     public CotizacionDto getById(long id){
         Cotizacion cotizacion=cotizacionRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("cotizacion","id",id));
 

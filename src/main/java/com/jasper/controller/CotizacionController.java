@@ -24,7 +24,6 @@ public class CotizacionController {
     public ResponseEntity<byte[]> exportPdf(@RequestBody CotizacionDto datos) throws JRException, FileNotFoundException {
 
         List<CotizacionDetalleDto> list=datos.getCotizacionDetalleDtos();
-        cotizacionService.save(datos);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.setContentDispositionFormData("cotizacion", "cotizacion.pdf");
